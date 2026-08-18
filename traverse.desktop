@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Traverse
+Comment=Dual-pane file manager
+# Replace INSTALL_DIR with the checkout path, e.g.
+#   sed "s|INSTALL_DIR|$PWD|" traverse.desktop > ~/.local/share/applications/traverse.desktop
+Exec=python3 INSTALL_DIR/main.py
+Icon=system-file-manager
+Terminal=false
+Categories=FileTools;FileManager;Utility;
+Keywords=files;manager;pane;dual;
+StartupWMClass=traverse
+StartupNotify=true

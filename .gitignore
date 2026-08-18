@@ -1,0 +1,42 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Packaging
+build/
+dist/
+*.egg-info/
+
+# Editor / OS noise
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Crash dumps
+core
+core.*
+
+# Per-user runtime state: bookmarks, hotkeys, column widths, open-with
+# defaults, window geometry and per-tab browsing history. All of it is
+# written by the running app and is specific to one machine and one person,
+# so none of it belongs in the repo. Built-in defaults live in
+# src/settings.py; the app recreates these files on first run.
+state/*.json
+
+# Claude Code local settings
+.claude/

@@ -1,0 +1,1 @@
+# Traverse - KDE File Manager
