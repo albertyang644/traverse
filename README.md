@@ -7,6 +7,11 @@ a device tree that mounts phones and SMB shares, live git status, verified
 transfers, and a hotkey for every action — including shell commands you define
 yourself.
 
+![Traverse in dual-pane mode](screenshots/dual-pane.png)
+
+*Dual pane, tabs, per-pane trees, and the Git column marking modified and
+untracked files inside a repo.*
+
 ---
 
 ## Features
@@ -55,6 +60,24 @@ yourself.
 - User-defined bash actions: name + shell command + hotkey, run in the active
   pane's directory
 - Font family and size; window geometry and splitter positions are remembered
+
+---
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Recursive search](screenshots/search.png) | ![Hotkey settings](screenshots/settings-hotkeys.png) |
+| Recursive wildcard search — results stream in and can be copied, moved or deleted in place. | Every action's hotkey is editable and persisted. |
+
+![Bash actions](screenshots/bash-actions.png)
+
+*Bash actions: name, shell command, hotkey — run in the active pane's directory.*
+
+All screenshots are rendered by `screenshots/generate.py`, which builds a
+synthetic demo tree in `/tmp` and grabs the real widgets on Qt's offscreen
+platform. Nothing in them comes from the machine that made them, and
+`python3 screenshots/generate.py` reproduces them without a display.
 
 ---
 

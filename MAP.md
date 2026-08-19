@@ -12,6 +12,8 @@ Tree Structure
 ├── src/  #  Python source package for the application
 │   ├── vcs/  #  VCS-agnostic status manager, cache, worker
 │   └── git/  #  The git provider (subprocess only, no Qt)
+├── screenshots/  #  README images + generate.py, which re-renders them
+│                 #  offscreen against a synthetic /tmp demo tree
 ├── docs/  #  AI generated Human Readable docs
 │   ├── git-architecture.md
 │   └── security-audit.md

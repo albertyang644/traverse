@@ -113,6 +113,8 @@ Bite-sized implementation checklist. Check off each task as completed.
 - [x] Fix tar path traversal in archive extraction (+ `tests/test_extract_safety.py`)
 - [x] Portable `traverse.desktop`; MIT `LICENSE`
 - [x] README, PLANS, TASKS, MAP and success criteria matched to the build
-- [ ] Decide on git history: squash to one initial commit, or push as-is
-      (old commits contain personal browsing history — see the audit)
-- [ ] Push to GitHub
+- [x] Screenshots rendered offscreen from a synthetic demo tree, with
+      `screenshots/generate.py` committed so they can be reproduced
+- [x] Squash to a single initial commit (pre-squash history kept in a local
+      bundle outside the repo)
+- [x] Push to GitHub (private)

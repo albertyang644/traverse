@@ -85,6 +85,8 @@ This file defines when each phase of Traverse is considered complete.
 - [x] Extracting a hostile archive cannot write outside the target directory
 - [x] `traverse.desktop` works after one documented substitution
 - [x] README describes the shipped build, not the Phase 1 build
+- [x] README screenshots show the real UI and contain nothing from the
+      developer's machine; `screenshots/generate.py` regenerates them
 
 ---
 
