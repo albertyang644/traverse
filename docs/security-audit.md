@@ -88,6 +88,15 @@ no untrusted caller to defend against.
 `OPENAI_API_KEY=ollama` in an old `state/defaults.json`, is the literal
 placeholder a local Ollama instance requires — not a credential.
 
+**Static analysis agrees.** `bandit -r src/ main.py` reports exactly one HIGH:
+the `shell=True` in `main_window.py` that runs user-defined bash actions,
+covered above. Everything else it flags is informational (B404/B603/B607 fire
+on every use of `subprocess`, whether or not a shell is involved) plus one
+`try/except/pass` in `toolbar.py`. Method note: this audit is a manual read of
+the ~8,000 lines of source plus that static pass. It is not a fuzzing campaign,
+and the UI-logic paths that never touch untrusted input got proportionally less
+attention than the ones that do.
+
 ---
 
 ## Open decision: history rewrite
@@ -97,11 +106,14 @@ The working tree is clean, but commits back to the start of the project contain
 and bookmark lists naming private directories and client projects. Publishing
 the repo publishes those commits.
 
-Two options, both fine; this is a privacy call, not a security one:
+**Resolved:** squashed to a single initial commit before the first push. The
+pre-squash history is kept in a local bundle outside the repo. Every blob in
+every published commit was then re-scanned: the only `/home/...` paths that
+remain are the placeholder `/home/user/...` in tests, and the only personal
+name is the copyright line in LICENSE.
 
-1. **Squash to a single initial commit** before pushing. Loses the development
-   history, guarantees nothing personal ships.
-2. **Push as-is.** The exposure is directory names, not credentials.
+One residual, by design: commit metadata carries the author's real email
+address, which becomes public along with the repository.
 
 ---
 
