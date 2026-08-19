@@ -75,9 +75,14 @@ untracked files inside a repo.*
 *Bash actions: name, shell command, hotkey — run in the active pane's directory.*
 
 All screenshots are rendered by `screenshots/generate.py`, which builds a
-synthetic demo tree in `/tmp` and grabs the real widgets on Qt's offscreen
-platform. Nothing in them comes from the machine that made them, and
+synthetic demo tree and grabs the real widgets on Qt's offscreen platform.
+Nothing in them comes from the machine that made them, and
 `python3 screenshots/generate.py` reproduces them without a display.
+
+That is why the paths read `/tmp/traverse-demo/...` rather than a home
+directory: the demo tree — media files, documents and a deliberately dirty git
+repo — is built under `/tmp` on each run and thrown away afterwards. In normal
+use those panes show wherever you actually are.
 
 ---
 
