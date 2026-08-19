@@ -43,7 +43,7 @@ All of `state/*.json` is now untracked and gitignored, and `.claude/` with it.
 exercises `StateManager` against a temporary directory instead, including the
 fresh-checkout case where `state/` does not exist at all.
 
-**Not fixed: the git history still contains them.** See "Open decision" below.
+The old history contained them too; see "History" below for how that was handled.
 
 ### 3. Hardcoded developer path in `traverse.desktop`
 
@@ -99,7 +99,7 @@ attention than the ones that do.
 
 ---
 
-## Open decision: history rewrite
+## History
 
 The working tree is clean, but commits back to the start of the project contain
 `state/session.json` and `state/bookmarks.json` — full per-tab browsing history
@@ -119,7 +119,7 @@ address, which becomes public along with the repository.
 
 ## Re-adjudicating `qwen_audit.md`
 
-That report claimed 44 passing tests (the suite is 88 after this pass), and
+That report claimed 44 passing tests (the suite is 90 after this pass), and
 several of its findings do not hold up:
 
 - Its #1 (path sanitisation) and #2 (permission pre-checks on file creation) are
