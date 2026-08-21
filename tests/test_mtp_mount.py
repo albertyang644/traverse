@@ -3,11 +3,11 @@ guard that decides whether a holder may be evicted."""
 
 import os
 
-from src.tree_panel import TreePanel, _MTP_BACKENDS
+from src.tree_panel import TreePanel
 
 
-def _may_evict(holders):
-    return bool(holders) and all(comm in _MTP_BACKENDS for _, comm in holders)
+def _evict(holders):
+    return [comm for _pid, comm in TreePanel._evictable_holders(holders)]
 
 
 def test_device_node_parsed_from_gio_error():
@@ -24,12 +24,33 @@ def test_device_node_absent_for_unrelated_error():
 
 
 def test_backend_holders_may_be_evicted():
-    assert _may_evict([(1, "kiod5"), (2, "gvfsd-mtp")])
+    assert _evict([(1, "kiod5"), (2, "gvfsd-mtp")]) == ["kiod5", "gvfsd-mtp"]
 
 
 def test_real_application_is_never_evicted():
-    assert not _may_evict([(1, "kiod5"), (2, "dolphin")])
-    assert not _may_evict([])
+    assert _evict([(1, "kiod5"), (2, "dolphin")]) == ["kiod5"]
+    assert _evict([(1, "dolphin")]) == []
+    assert _evict([]) == []
+
+
+def test_adb_does_not_shield_the_backend_holding_the_device():
+    """The bug this guards: adb holds the same USB node but never claims the
+    MTP interface, and an all-or-nothing guard let it block the eviction of
+    the KIO worker that did — so the phone opened in Dolphin and nowhere
+    else."""
+    assert _evict([(821001, "adb"), (3113269, "kiod5")]) == ["kiod5"]
+
+
+def test_failure_message_does_not_blame_a_non_blocking_holder():
+    message = TreePanel._mount_failure_message("boom", [(821001, "adb")])
+    assert "adb" not in message
+    assert "File Transfer / MTP" in message
+
+
+def test_failure_message_names_only_the_real_blocker():
+    message = TreePanel._mount_failure_message("boom", [(1, "adb"), (2, "kiod5")])
+    assert "kiod5 (pid 2)" in message
+    assert "adb" not in message
 
 
 def test_holder_scan_finds_this_process(tmp_path):

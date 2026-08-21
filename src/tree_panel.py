@@ -33,6 +33,12 @@ _MAX_DIRS = 300  # cap per level to avoid massive trees
 _MTP_BACKENDS = frozenset({
     "kiod5", "kiod6", "kioslave5", "kioslave6", "kio_mtp", "gvfsd-mtp",
 })
+# Processes that hold the USB node open without ever claiming the MTP
+# interface, so they never block a mount. adb is the common one: it talks to
+# the phone's ADB interface, and a mount succeeds with the adb server running.
+# They must not be named as the culprit, and must not stop us evicting a
+# backend that really is holding the MTP interface.
+_NON_BLOCKING_HOLDERS = frozenset({"adb"})
 _MOUNT_TIMEOUT = "__mount_timeout__"
 _MOUNT_NO_GIO = "__mount_no_gio__"
 
@@ -601,9 +607,13 @@ class _DevicesTree(_LazyTree):
             # and they never let go. They restart on demand, so evicting one is safe.
             node = TreePanel._mtp_device_node(detail)
             holders = TreePanel._usb_device_holders(node) if node else []
-            if holders and all(comm in _MTP_BACKENDS for _, comm in holders):
-                TreePanel._release_usb_device(node, holders)
+            evictable = TreePanel._evictable_holders(holders)
+            if evictable:
+                TreePanel._release_usb_device(node, evictable)
                 detail = TreePanel._gio_mount_mtp(activation_root)
+                # Whoever is left is what the user has to deal with, so ask
+                # again rather than blaming the process we just evicted.
+                holders = TreePanel._usb_device_holders(node) if node and detail else []
             if detail is not None:
                 self.panel.device_connection_failed.emit(TreePanel._mount_failure_message(detail, holders))
                 return
@@ -1010,16 +1020,36 @@ class TreePanel(QWidget):
         return holders
 
     @staticmethod
+    def _evictable_holders(holders: list[tuple[int, str]]) -> list[tuple[int, str]]:
+        """The subset of holders that may be SIGTERMed to free the device.
+
+        Only desktop MTP backends qualify: they are respawned on demand, so
+        evicting one costs the user nothing. Everything else is left running —
+        a real application because killing it would be rude, and a
+        non-claiming holder like adb because it is not in the way to begin
+        with. Deciding per holder matters: an adb server sitting on the same
+        USB node must not stop us evicting the KIO worker that actually holds
+        the MTP interface, which is the usual reason a phone will open in
+        Dolphin (its own worker already owns the device) but nowhere else.
+        """
+        return [(pid, comm) for pid, comm in holders if comm in _MTP_BACKENDS]
+
+    @staticmethod
     def _release_usb_device(node: str, holders: list[tuple[int, str]], timeout: float = 3.0):
-        """Ask the holding processes to exit, then wait for the node to free up."""
-        for pid, _ in holders:
+        """Ask the given processes to exit, then wait for them to let go."""
+        targets = {pid for pid, _ in holders}
+        for pid in targets:
             try:
                 os.kill(pid, signal.SIGTERM)
             except OSError:
                 pass
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
-            if not TreePanel._usb_device_holders(node):
+            # Only the targets need to go. Waiting for the node to be
+            # completely unused would burn the whole timeout whenever a
+            # harmless holder such as adb is attached to the same phone.
+            still_holding = {pid for pid, _ in TreePanel._usb_device_holders(node)}
+            if not (targets & still_holding):
                 return
             time.sleep(0.1)
 
@@ -1036,8 +1066,10 @@ class TreePanel(QWidget):
             "If the phone is open in Dolphin or another file manager, close that phone view first "
             "because MTP permits only one active client."
         )
-        if holders:
-            names = ", ".join(sorted({f"{comm} (pid {pid})" for pid, comm in holders}))
+        blockers = [(pid, comm) for pid, comm in holders
+                    if comm not in _NON_BLOCKING_HOLDERS]
+        if blockers:
+            names = ", ".join(sorted({f"{comm} (pid {pid})" for pid, comm in blockers}))
             message = (
                 f"Could not connect to the phone: {names} already has it open, "
                 "and MTP permits only one active client. Close that program and try again."
