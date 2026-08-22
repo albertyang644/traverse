@@ -50,6 +50,15 @@ untracked files inside a repo.*
 - Transfers to MTP go through `gio copy`, with progress and optional
   SHA-256 verification
 
+MTP allows exactly one client per device, which is why a phone that opens
+fine in Dolphin can refuse to open anywhere else: Dolphin's KIO worker still
+holds it. When a mount fails for that reason, Traverse SIGTERMs the desktop
+MTP backends holding the USB node — `kiod5`/`kiod6`, `kio_mtp`, `gvfsd-mtp`,
+all of which the desktop respawns on demand — and retries. It never signals
+anything else, so an unrelated program holding the same node (an `adb`
+server, say, which never claims the MTP interface) is left running. The
+trade is symmetric: while Traverse holds the phone, Dolphin cannot.
+
 **Git**
 - Per-file status column, per-directory badges in the tree, current branch in
   the status bar

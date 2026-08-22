@@ -88,6 +88,8 @@ Bite-sized implementation checklist. Check off each task as completed.
 - [x] `src/credential_store.py` — SMB credentials in KDE Wallet
 - [x] SMB bookmarks persisted as `smb://` URIs, re-mounted on click
 - [x] `tests/test_mtp_mount.py`
+- [x] Free a phone held by KDE's KIO worker by evicting only the MTP
+      backends, so a running adb server no longer blocks the mount
 
 ## Phase 8 — Transfers - [COMPLETED] ✓
 
